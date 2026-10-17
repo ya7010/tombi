@@ -37,6 +37,134 @@ fn tombi_cache_dir_path() -> Option<std::path::PathBuf> {
     None
 }
 
+/// Resolve the configured cache location without creating it.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn cache_dir_path() -> Result<std::path::PathBuf, crate::Error> {
+    let path = tombi_cache_dir_path().ok_or(crate::Error::CacheDirectoryUnavailable)?;
+    if path.as_os_str().is_empty() {
+        return Err(crate::Error::UnsafeCacheDirectory {
+            cache_dir_path: path,
+        });
+    }
+    std::path::absolute(&path).map_err(|error| crate::Error::CacheDirectoryResolveFailed {
+        cache_dir_path: path,
+        reason: error.to_string(),
+    })
+}
+
+/// Remove every entry within the cache directory while preserving the directory.
+#[cfg(not(target_arch = "wasm32"))]
+pub async fn clean_cache(force: bool) -> Result<(), crate::Error> {
+    let path = cache_dir_path()?;
+    let metadata = match tokio::fs::symlink_metadata(&path).await {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(error) => {
+            return Err(crate::Error::CacheDirectoryRemoveFailed {
+                cache_dir_path: path,
+                reason: error.to_string(),
+            });
+        }
+    };
+    if metadata.file_type().is_symlink() || !metadata.is_dir() {
+        return Err(crate::Error::UnsafeCacheDirectory {
+            cache_dir_path: path,
+        });
+    }
+
+    let canonical = tokio::fs::canonicalize(&path).await.map_err(|error| {
+        crate::Error::CacheDirectoryResolveFailed {
+            cache_dir_path: path.clone(),
+            reason: error.to_string(),
+        }
+    })?;
+    let current_dir = std::env::current_dir()
+        .and_then(std::fs::canonicalize)
+        .map_err(|error| crate::Error::CacheDirectoryResolveFailed {
+            cache_dir_path: path.clone(),
+            reason: error.to_string(),
+        })?;
+    let home_dir = dirs::home_dir().and_then(|home| std::fs::canonicalize(home).ok());
+    let default_cache_dir =
+        dirs::home_dir().and_then(|home| std::fs::canonicalize(home.join(".cache")).ok());
+    let xdg_dir = std::env::var_os("XDG_CACHE_HOME")
+        .filter(|value| !value.is_empty())
+        .and_then(|value| std::fs::canonicalize(value).ok());
+    if is_unsafe_clean_target(
+        &canonical,
+        &current_dir,
+        home_dir.as_deref(),
+        default_cache_dir.as_deref(),
+        xdg_dir.as_deref(),
+    ) {
+        return Err(crate::Error::UnsafeCacheDirectory {
+            cache_dir_path: path,
+        });
+    }
+
+    let conventional = std::env::var_os("XDG_CACHE_HOME")
+        .filter(|value| !value.is_empty())
+        .map(|value| std::path::PathBuf::from(value).join("tombi"))
+        .or_else(|| dirs::home_dir().map(|home| home.join(".cache/tombi")))
+        .and_then(|path| std::fs::canonicalize(path).ok());
+    if !force && conventional.as_deref() != Some(canonical.as_path()) {
+        return Err(crate::Error::CacheDirectoryRequiresForce {
+            cache_dir_path: path,
+        });
+    }
+
+    let mut entries = tokio::fs::read_dir(&path).await.map_err(|error| {
+        crate::Error::CacheDirectoryRemoveFailed {
+            cache_dir_path: path.clone(),
+            reason: error.to_string(),
+        }
+    })?;
+    while let Some(entry) =
+        entries
+            .next_entry()
+            .await
+            .map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
+                cache_dir_path: path.clone(),
+                reason: error.to_string(),
+            })?
+    {
+        let entry_path = entry.path();
+        let file_type =
+            entry
+                .file_type()
+                .await
+                .map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
+                    cache_dir_path: entry_path.clone(),
+                    reason: error.to_string(),
+                })?;
+        let result = if file_type.is_dir() {
+            tokio::fs::remove_dir_all(&entry_path).await
+        } else {
+            tokio::fs::remove_file(&entry_path).await
+        };
+        result.map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
+            cache_dir_path: entry_path,
+            reason: error.to_string(),
+        })?;
+    }
+    Ok(())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn is_unsafe_clean_target(
+    canonical: &std::path::Path,
+    current_dir: &std::path::Path,
+    home_dir: Option<&std::path::Path>,
+    default_cache_dir: Option<&std::path::Path>,
+    xdg_dir: Option<&std::path::Path>,
+) -> bool {
+    canonical.parent().is_none()
+        || current_dir.starts_with(canonical)
+        || home_dir == Some(canonical)
+        || default_cache_dir == Some(canonical)
+        || xdg_dir == Some(canonical)
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn get_cache_file_path(cache_file_uri: &tombi_uri::Uri) -> Option<std::path::PathBuf> {
     Some(cache_file_path(
@@ -239,6 +367,129 @@ mod tests {
 
     use super::*;
     use tombi_test_lib::TestCacheHome;
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn missing_cache_does_not_create_directory() {
+        let cache_home = TestCacheHome::new();
+        let path = cache_dir_path().unwrap();
+        assert_eq!(path, cache_home.tombi_cache_dir_path());
+        assert!(!path.exists());
+        clean_cache(false).await.unwrap();
+        assert!(!path.exists());
+    }
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn removes_files_and_directories_but_keeps_root() {
+        let cache_home = TestCacheHome::new();
+        let path = cache_home.tombi_cache_dir_path();
+        std::fs::create_dir_all(path.join("nested")).unwrap();
+        std::fs::write(path.join("catalog.json"), "catalog").unwrap();
+        std::fs::write(path.join("nested/schema.json"), "schema").unwrap();
+
+        clean_cache(false).await.unwrap();
+
+        assert!(path.is_dir());
+        assert_eq!(std::fs::read_dir(&path).unwrap().count(), 0);
+    }
+
+    #[cfg(unix)]
+    #[tokio::test(flavor = "current_thread")]
+    async fn removes_child_symlink_without_following_it() {
+        use std::os::unix::fs::symlink;
+
+        let cache_home = TestCacheHome::new();
+        let path = cache_home.tombi_cache_dir_path();
+        let outside = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(&path).unwrap();
+        std::fs::write(outside.path().join("keep.json"), "keep").unwrap();
+        symlink(outside.path(), path.join("link")).unwrap();
+
+        clean_cache(false).await.unwrap();
+
+        assert!(!path.join("link").exists());
+        assert_eq!(
+            std::fs::read_to_string(outside.path().join("keep.json")).unwrap(),
+            "keep"
+        );
+    }
+
+    #[cfg(unix)]
+    #[tokio::test(flavor = "current_thread")]
+    async fn rejects_filesystem_root_even_with_force() {
+        let _cache_home = TestCacheHome::with_tombi_cache_home(Some(std::path::Path::new("/")));
+        assert!(matches!(
+            clean_cache(true).await,
+            Err(Error::UnsafeCacheDirectory { .. })
+        ));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn rejects_protected_roots() {
+        use std::path::Path;
+
+        let root = Path::new("/");
+        let cwd = Path::new("/work/project");
+        let home = Path::new("/users/me");
+        let default_cache_parent = Path::new("/users/me/.cache");
+        let xdg = Path::new("/tmp/xdg");
+        for target in [
+            root,
+            Path::new("/work"),
+            cwd,
+            home,
+            default_cache_parent,
+            xdg,
+        ] {
+            assert!(is_unsafe_clean_target(
+                target,
+                cwd,
+                Some(home),
+                Some(default_cache_parent),
+                Some(xdg),
+            ));
+        }
+        assert!(!is_unsafe_clean_target(
+            Path::new("/tmp/xdg/tombi"),
+            cwd,
+            Some(home),
+            Some(default_cache_parent),
+            Some(xdg),
+        ));
+    }
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn custom_cache_requires_force_and_keeps_contents_on_rejection() {
+        let temp = tempfile::tempdir().unwrap();
+        let custom = temp.path().join("custom");
+        std::fs::create_dir(&custom).unwrap();
+        let sentinel = custom.join("keep.txt");
+        std::fs::write(&sentinel, "keep").unwrap();
+        let _cache_home = TestCacheHome::with_tombi_cache_home(Some(&custom));
+
+        assert!(matches!(
+            clean_cache(false).await,
+            Err(Error::CacheDirectoryRequiresForce { .. })
+        ));
+        assert_eq!(std::fs::read_to_string(&sentinel).unwrap(), "keep");
+
+        clean_cache(true).await.unwrap();
+        assert!(custom.is_dir());
+        assert!(!sentinel.exists());
+    }
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn explicit_conventional_cache_home_does_not_require_force() {
+        let cache_home = TestCacheHome::new();
+        let conventional = cache_home.tombi_cache_dir_path();
+        std::fs::create_dir(&conventional).unwrap();
+        let sentinel = conventional.join("cached.json");
+        std::fs::write(&sentinel, "cache").unwrap();
+        unsafe { std::env::set_var("TOMBI_CACHE_HOME", &conventional) };
+
+        clean_cache(false).await.unwrap();
+        assert!(!sentinel.exists());
+    }
 
     #[tokio::test(flavor = "current_thread")]
     async fn appends_index_file_to_non_json_http_paths() {

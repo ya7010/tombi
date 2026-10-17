@@ -367,6 +367,17 @@ The value must be a non-negative integer in seconds. The CLI option overrides th
 
 ### How to Clear Cache
 #### CLI
+Run `tombi cache clean` to remove all cached catalogs and schemas. The cache directory remains in place. Use `tombi cache dir` to print its absolute path, including when the directory does not exist yet.
+
+If `TOMBI_CACHE_HOME` points to a directory other than the default Tombi cache directory, pass `--force` to clean it. Check `tombi cache dir` before using `--force` because cleaning removes every entry in that directory.
+
+```bash
+tombi cache dir
+tombi cache clean
+# For a custom TOMBI_CACHE_HOME directory:
+tombi cache clean --force
+```
+
 Use `--no-cache` option to disable using caches for a CLI command.
 
 ```bash
