@@ -8,9 +8,6 @@ pub enum Error {
     #[error("unsafe cache directory: {cache_dir_path}")]
     UnsafeCacheDirectory { cache_dir_path: PathBuf },
 
-    #[error("custom cache directory requires `tombi cache clean --force`: {cache_dir_path}")]
-    CacheDirectoryRequiresForce { cache_dir_path: PathBuf },
-
     #[error("failed to resolve cache directory: {cache_dir_path}, reason: {reason}")]
     CacheDirectoryResolveFailed {
         cache_dir_path: PathBuf,

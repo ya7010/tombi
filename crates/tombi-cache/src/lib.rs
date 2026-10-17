@@ -54,8 +54,9 @@ pub fn cache_dir_path() -> Result<std::path::PathBuf, crate::Error> {
 
 /// Remove every entry within the cache directory while preserving the directory.
 #[cfg(not(target_arch = "wasm32"))]
-pub async fn clean_cache(force: bool) -> Result<(), crate::Error> {
-    let path = cache_dir_path()?;
+pub async fn clean_cache() -> Result<(), crate::Error> {
+    // Remove a trailing separator before checking the final path component for a symlink.
+    let path: std::path::PathBuf = cache_dir_path()?.components().collect();
     let metadata = match tokio::fs::symlink_metadata(&path).await {
         Ok(metadata) => metadata,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
@@ -98,17 +99,6 @@ pub async fn clean_cache(force: bool) -> Result<(), crate::Error> {
         xdg_dir.as_deref(),
     ) {
         return Err(crate::Error::UnsafeCacheDirectory {
-            cache_dir_path: path,
-        });
-    }
-
-    let conventional = std::env::var_os("XDG_CACHE_HOME")
-        .filter(|value| !value.is_empty())
-        .map(|value| std::path::PathBuf::from(value).join("tombi"))
-        .or_else(|| dirs::home_dir().map(|home| home.join(".cache/tombi")))
-        .and_then(|path| std::fs::canonicalize(path).ok());
-    if !force && conventional.as_deref() != Some(canonical.as_path()) {
-        return Err(crate::Error::CacheDirectoryRequiresForce {
             cache_dir_path: path,
         });
     }
@@ -160,9 +150,9 @@ fn is_unsafe_clean_target(
 ) -> bool {
     canonical.parent().is_none()
         || current_dir.starts_with(canonical)
-        || home_dir == Some(canonical)
-        || default_cache_dir == Some(canonical)
-        || xdg_dir == Some(canonical)
+        || home_dir.is_some_and(|home| home.starts_with(canonical))
+        || default_cache_dir.is_some_and(|cache| cache.starts_with(canonical))
+        || xdg_dir.is_some_and(|xdg| xdg.starts_with(canonical))
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -374,7 +364,7 @@ mod tests {
         let path = cache_dir_path().unwrap();
         assert_eq!(path, cache_home.tombi_cache_dir_path());
         assert!(!path.exists());
-        clean_cache(false).await.unwrap();
+        clean_cache().await.unwrap();
         assert!(!path.exists());
     }
 
@@ -386,7 +376,7 @@ mod tests {
         std::fs::write(path.join("catalog.json"), "catalog").unwrap();
         std::fs::write(path.join("nested/schema.json"), "schema").unwrap();
 
-        clean_cache(false).await.unwrap();
+        clean_cache().await.unwrap();
 
         assert!(path.is_dir());
         assert_eq!(std::fs::read_dir(&path).unwrap().count(), 0);
@@ -404,7 +394,7 @@ mod tests {
         std::fs::write(outside.path().join("keep.json"), "keep").unwrap();
         symlink(outside.path(), path.join("link")).unwrap();
 
-        clean_cache(false).await.unwrap();
+        clean_cache().await.unwrap();
 
         assert!(!path.join("link").exists());
         assert_eq!(
@@ -415,10 +405,10 @@ mod tests {
 
     #[cfg(unix)]
     #[tokio::test(flavor = "current_thread")]
-    async fn rejects_filesystem_root_even_with_force() {
+    async fn rejects_filesystem_root() {
         let _cache_home = TestCacheHome::with_tombi_cache_home(Some(std::path::Path::new("/")));
         assert!(matches!(
-            clean_cache(true).await,
+            clean_cache().await,
             Err(Error::UnsafeCacheDirectory { .. })
         ));
     }
@@ -437,8 +427,10 @@ mod tests {
             root,
             Path::new("/work"),
             cwd,
+            Path::new("/users"),
             home,
             default_cache_parent,
+            Path::new("/tmp"),
             xdg,
         ] {
             assert!(is_unsafe_clean_target(
@@ -459,27 +451,24 @@ mod tests {
     }
 
     #[tokio::test(flavor = "current_thread")]
-    async fn custom_cache_requires_force_and_keeps_contents_on_rejection() {
+    async fn cleans_custom_cache_without_touching_sibling() {
         let temp = tempfile::tempdir().unwrap();
         let custom = temp.path().join("custom");
         std::fs::create_dir(&custom).unwrap();
-        let sentinel = custom.join("keep.txt");
-        std::fs::write(&sentinel, "keep").unwrap();
+        let cached = custom.join("cached.txt");
+        let sibling = temp.path().join("keep.txt");
+        std::fs::write(&cached, "cache").unwrap();
+        std::fs::write(&sibling, "keep").unwrap();
         let _cache_home = TestCacheHome::with_tombi_cache_home(Some(&custom));
 
-        assert!(matches!(
-            clean_cache(false).await,
-            Err(Error::CacheDirectoryRequiresForce { .. })
-        ));
-        assert_eq!(std::fs::read_to_string(&sentinel).unwrap(), "keep");
-
-        clean_cache(true).await.unwrap();
+        clean_cache().await.unwrap();
         assert!(custom.is_dir());
-        assert!(!sentinel.exists());
+        assert!(!cached.exists());
+        assert_eq!(std::fs::read_to_string(&sibling).unwrap(), "keep");
     }
 
     #[tokio::test(flavor = "current_thread")]
-    async fn explicit_conventional_cache_home_does_not_require_force() {
+    async fn cleans_explicit_conventional_cache_home() {
         let cache_home = TestCacheHome::new();
         let conventional = cache_home.tombi_cache_dir_path();
         std::fs::create_dir(&conventional).unwrap();
@@ -487,8 +476,32 @@ mod tests {
         std::fs::write(&sentinel, "cache").unwrap();
         unsafe { std::env::set_var("TOMBI_CACHE_HOME", &conventional) };
 
-        clean_cache(false).await.unwrap();
+        clean_cache().await.unwrap();
         assert!(!sentinel.exists());
+    }
+
+    #[cfg(unix)]
+    #[tokio::test(flavor = "current_thread")]
+    async fn rejects_root_symlink_with_trailing_slash() {
+        use std::os::unix::fs::symlink;
+
+        let temp = tempfile::tempdir().unwrap();
+        let target = temp.path().join("target");
+        let link = temp.path().join("link");
+        std::fs::create_dir(&target).unwrap();
+        std::fs::write(target.join("keep.txt"), "keep").unwrap();
+        symlink(&target, &link).unwrap();
+        let path = std::path::PathBuf::from(format!("{}/", link.display()));
+        let _cache_home = TestCacheHome::with_tombi_cache_home(Some(&path));
+
+        assert!(matches!(
+            clean_cache().await,
+            Err(Error::UnsafeCacheDirectory { .. })
+        ));
+        assert_eq!(
+            std::fs::read_to_string(target.join("keep.txt")).unwrap(),
+            "keep"
+        );
     }
 
     #[tokio::test(flavor = "current_thread")]
