@@ -43,7 +43,7 @@ pub async fn serve(config: ServerConfig) -> Result<(), JsValue> {
         .try_into_async_write()
         .map_err(|error| error.0)?;
 
-    let (service, socket) = tombi_lsp::lsp_service(false, false);
+    let (service, socket) = tombi_lsp::lsp_service(false, Default::default());
     tower_lsp_server::Server::new(input, output, socket)
         .serve(service)
         .await;

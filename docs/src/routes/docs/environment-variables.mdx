@@ -42,7 +42,9 @@ When set, Tombi will bypass the cache and fetch the latest schemas from remote s
 
 Set the cache expiration time (Time To Live) in seconds for JSON Catalog/Schemas.
 
-When set, Tombi will use this value as the cache expiration time instead of the default 24 hours. Cached schemas older than this duration will be automatically refreshed from remote sources.
+When set, Tombi uses this value as the cache expiration time instead of the default 24 hours. Cached schemas older than this duration are refreshed from remote sources.
+
+The `--cache-ttl <SECONDS>` option for `tombi format`, `tombi lint`, and `tombi lsp` overrides this environment variable. Values must be non-negative integers. The CLI rejects an invalid environment variable value.
 
 - Type: `Integer` (seconds)
 - Default: `86400` (24 hours)
