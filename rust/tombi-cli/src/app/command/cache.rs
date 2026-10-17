@@ -17,7 +17,7 @@ pub fn run(args: Args) -> Result<(), crate::Error> {
         CacheCommand::Clean => {
             super::runtime(true)?.block_on(tombi_cache::clean_cache())?;
         }
-        CacheCommand::Dir => println!("{}", tombi_cache::cache_dir_path()?.display()),
+        CacheCommand::Dir => println!("{}", tombi_cache::tombi_cache_dir_path()?.display()),
     }
     Ok(())
 }
