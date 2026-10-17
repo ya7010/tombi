@@ -500,7 +500,7 @@ fn schema_store_options(
             no_cache: backend_options.no_cache,
             cache_ttl: backend_options
                 .cache_ttl
-                .or_else(|| tombi_cache::Options::default().cache_ttl),
+                .or(Some(tombi_cache::DEFAULT_CACHE_TTL_DURATION)),
         }),
         trusted_hosts: None,
     }
