@@ -83,6 +83,7 @@ pub enum DiagnosticMode {
 pub struct Options {
     pub offline: Option<bool>,
     pub no_cache: Option<bool>,
+    pub cache_ttl: Option<std::time::Duration>,
 }
 
 impl Backend {

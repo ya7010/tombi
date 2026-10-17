@@ -357,7 +357,13 @@ Tombi caches JSON Catalog/Schemas in the file system to avoid unnecessary networ
 ### Cache Expiration
 Cached schemas expire after **24 hours** by default. When a cached schema expires, Tombi automatically fetches the latest version from the remote source.
 
-You can customize the cache expiration time using the `TOMBI_CACHE_TTL` environment variable. See [Environment Variables](/docs/environment-variables#tombi-cache-ttl) for details.
+Use `--cache-ttl <SECONDS>` to set the cache expiration time for `tombi format`, `tombi lint`, or `tombi lsp`:
+
+```sh
+tombi format --cache-ttl 3600
+```
+
+The value must be a non-negative integer in seconds. The CLI option overrides the `TOMBI_CACHE_TTL` environment variable. When neither is set, the default is `86400` seconds (24 hours). See [Environment Variables](/docs/environment-variables#tombi-cache-ttl) for details.
 
 ### How to Clear Cache
 #### CLI

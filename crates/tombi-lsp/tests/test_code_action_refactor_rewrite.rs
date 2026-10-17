@@ -577,6 +577,7 @@ mod refactor_rewrite {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(false),
+                    ..Default::default()
                 },
                 UseCacheResponses(vec![CachedResponseSpec::new(
                     "https://crates.io/api/v1/crates/serde",
@@ -606,6 +607,7 @@ mod refactor_rewrite {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(false),
+                    ..Default::default()
                 },
                 UseCacheResponses(vec![CachedResponseSpec::new(
                     "https://crates.io/api/v1/crates/serde",
@@ -642,6 +644,7 @@ mod refactor_rewrite {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(false),
+                    ..Default::default()
                 },
                 UseCacheResponses(vec![CachedResponseSpec::new(
                     "https://pypi.org/pypi/requests/json",
@@ -671,6 +674,7 @@ mod refactor_rewrite {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(false),
+                    ..Default::default()
                 },
                 UseCacheResponses(vec![CachedResponseSpec::new(
                     "https://pypi.org/pypi/requests/json",
@@ -703,6 +707,7 @@ mod refactor_rewrite {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(false),
+                    ..Default::default()
                 },
                 UseCacheResponses(vec![CachedResponseSpec::new(
                     "https://pypi.org/pypi/requests/json",

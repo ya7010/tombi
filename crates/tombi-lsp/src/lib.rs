@@ -100,6 +100,7 @@ pub use hover::HoverContent;
 pub fn lsp_service(
     offline: bool,
     no_cache: bool,
+    cache_ttl: Option<std::time::Duration>,
 ) -> (
     tower_lsp_server::LspService<Backend>,
     tower_lsp_server::ClientSocket,
@@ -110,6 +111,7 @@ pub fn lsp_service(
             &crate::backend::Options {
                 offline: offline.then_some(true),
                 no_cache: no_cache.then_some(true),
+                cache_ttl,
             },
         )
     })

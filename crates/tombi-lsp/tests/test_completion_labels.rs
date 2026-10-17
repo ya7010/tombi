@@ -39,6 +39,7 @@ mod completion_labels {
             tombi_lsp::backend::Options {
                 offline: Some(true),
                 no_cache: Some(false),
+                ..Default::default()
             },
         ) -> Ok([
             {
@@ -2571,6 +2572,7 @@ mod completion_labels {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: None,
+                    ..Default::default()
                 },
                 PreselectedLabels(&["\"0.3.0-pre.2\""]),
                 CachedResponse::new(
@@ -3293,6 +3295,7 @@ mod completion_labels {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok(["true", "false"]);
         }

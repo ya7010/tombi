@@ -47,6 +47,24 @@ struct CommonArgs {
     /// Fetch the latest data from remote and save it to the cache
     #[clap(long, global = true, env("TOMBI_NO_CACHE"))]
     no_cache: bool,
+
+    /// Cache expiration time in seconds
+    ///
+    /// Overrides TOMBI_CACHE_TTL. Defaults to 86400 seconds (24 hours).
+    #[clap(long, global = true, value_name = "SECONDS")]
+    cache_ttl: Option<u64>,
+}
+
+impl CommonArgs {
+    fn cache_options(&self) -> tombi_cache::Options {
+        let mut options = tombi_cache::Options::default();
+        options.no_cache = self.no_cache.then_some(true);
+        options.cache_ttl = self
+            .cache_ttl
+            .map(std::time::Duration::from_secs)
+            .or(options.cache_ttl);
+        options
+    }
 }
 
 pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {

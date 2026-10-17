@@ -872,6 +872,7 @@ mod goto_type_definition_tests {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok(fixture_path().join("schema.json"));
         );

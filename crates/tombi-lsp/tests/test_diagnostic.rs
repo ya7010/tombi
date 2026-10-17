@@ -301,6 +301,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([
                 Diagnostic {
@@ -323,6 +324,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([
                 Diagnostic {
@@ -344,6 +346,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([
                 Diagnostic {
@@ -366,6 +369,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([
                 Diagnostic {
@@ -387,6 +391,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([]);
         );
@@ -403,6 +408,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([
                 Diagnostic {
@@ -424,6 +430,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([
                 Diagnostic {
@@ -448,6 +455,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([]);
         );
@@ -465,6 +473,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([
                 Diagnostic {
@@ -486,6 +495,7 @@ mod diagnostic {
                 tombi_lsp::backend::Options {
                     offline: Some(true),
                     no_cache: Some(true),
+                    ..Default::default()
                 },
             ) -> Ok([]);
         );
