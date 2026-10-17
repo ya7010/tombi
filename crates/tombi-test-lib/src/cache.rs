@@ -1,6 +1,6 @@
 use std::{
     ffi::OsString,
-    path::{Path, PathBuf},
+    path::Path,
     sync::{Mutex, MutexGuard, OnceLock},
 };
 
@@ -50,10 +50,6 @@ impl TestCacheHome {
 
     pub fn xdg_cache_home_path(&self) -> &Path {
         self.temp_dir.path()
-    }
-
-    pub fn tombi_cache_dir_path(&self) -> PathBuf {
-        self.temp_dir.path().join("tombi")
     }
 }
 
