@@ -485,10 +485,6 @@ fn schema_store_options(
     config: &Config,
     backend_options: &crate::backend::Options,
 ) -> tombi_schema_store::Options {
-    let mut cache_options = tombi_cache::Options::default();
-    cache_options.no_cache = backend_options.no_cache;
-    cache_options.cache_ttl = backend_options.cache_ttl.or(cache_options.cache_ttl);
-
     tombi_schema_store::Options {
         offline: backend_options.offline,
         strict: config.schema.as_ref().and_then(|schema| schema.strict()),
@@ -500,7 +496,12 @@ fn schema_store_options(
             .schema
             .as_ref()
             .and_then(|schema| schema.lint.clone()),
-        cache: Some(cache_options),
+        cache: Some(tombi_cache::Options {
+            no_cache: backend_options.no_cache,
+            cache_ttl: backend_options
+                .cache_ttl
+                .or_else(|| tombi_cache::Options::default().cache_ttl),
+        }),
         trusted_hosts: None,
     }
 }
