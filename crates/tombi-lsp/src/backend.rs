@@ -82,8 +82,7 @@ pub enum DiagnosticMode {
 #[derive(Debug, Clone, Default)]
 pub struct Options {
     pub offline: Option<bool>,
-    pub no_cache: Option<bool>,
-    pub cache_ttl: Option<std::time::Duration>,
+    pub cache: tombi_cache::Options,
 }
 
 impl Backend {

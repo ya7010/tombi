@@ -38,7 +38,10 @@ mod completion_labels {
             ),
             tombi_lsp::backend::Options {
                 offline: Some(true),
-                no_cache: Some(false),
+                cache: tombi_cache::Options {
+                    no_cache: Some(false),
+                    ..Default::default()
+                },
                 ..Default::default()
             },
         ) -> Ok([
@@ -2571,7 +2574,10 @@ mod completion_labels {
                 SchemaPath(cargo_schema_path()),
                 tombi_lsp::backend::Options {
                     offline: Some(true),
-                    no_cache: None,
+                    cache: tombi_cache::Options {
+                        no_cache: None,
+                        ..Default::default()
+                    },
                     ..Default::default()
                 },
                 PreselectedLabels(&["\"0.3.0-pre.2\""]),
@@ -3294,7 +3300,10 @@ mod completion_labels {
                 SchemaPath(fixture_path().join("schema.json")),
                 tombi_lsp::backend::Options {
                     offline: Some(true),
-                    no_cache: Some(true),
+                    cache: tombi_cache::Options {
+                        no_cache: Some(true),
+                        ..Default::default()
+                    },
                     ..Default::default()
                 },
             ) -> Ok(["true", "false"]);
