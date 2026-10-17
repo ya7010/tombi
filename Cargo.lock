@@ -2790,6 +2790,7 @@ dependencies = [
 name = "tombi-cache"
 version = "0.0.0-dev"
 dependencies = [
+ "cap-primitives",
  "cap-std",
  "dirs",
  "log",

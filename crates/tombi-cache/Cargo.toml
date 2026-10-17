@@ -20,6 +20,7 @@ dirs.workspace = true
 log.workspace = true
 tokio = { workspace = true, features = ["fs", "io-util"] }
 cap-std = "4"
+cap-primitives = "4"
 same-file = "1"
 
 [lints]

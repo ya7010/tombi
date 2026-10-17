@@ -179,7 +179,24 @@ fn remove_cache_contents(
                     reason: error.to_string(),
                 })?;
         let result = if file_type.is_dir() {
-            directory.remove_dir_all(&name)
+            let parent = directory.try_clone().map_err(|error| {
+                crate::Error::CacheDirectoryRemoveFailed {
+                    cache_dir_path: entry_path.clone(),
+                    reason: error.to_string(),
+                }
+            })?;
+            let child = cap_primitives::fs::open_dir_nofollow(
+                &parent.into_std_file(),
+                std::path::Path::new(&name),
+            )
+            .map_err(|error| crate::Error::CacheDirectoryRemoveFailed {
+                cache_dir_path: entry_path.clone(),
+                reason: error.to_string(),
+            })?;
+            let child = cap_std::fs::Dir::from_std_file(child);
+            remove_cache_contents(&child, &entry_path)?;
+            drop(child);
+            directory.remove_dir(&name)
         } else {
             directory.remove_file(&name)
         };
@@ -441,13 +458,15 @@ mod tests {
         let cache_home = TestCacheHome::new();
         let path = cache_home.tombi_cache_dir_path();
         let outside = tempfile::tempdir().unwrap();
-        std::fs::create_dir_all(&path).unwrap();
+        std::fs::create_dir_all(path.join("nested")).unwrap();
         std::fs::write(outside.path().join("keep.json"), "keep").unwrap();
         symlink(outside.path(), path.join("link")).unwrap();
+        symlink(outside.path(), path.join("nested/link")).unwrap();
 
         clean_cache().await.unwrap();
 
         assert!(!path.join("link").exists());
+        assert!(!path.join("nested").exists());
         assert_eq!(
             std::fs::read_to_string(outside.path().join("keep.json")).unwrap(),
             "keep"
