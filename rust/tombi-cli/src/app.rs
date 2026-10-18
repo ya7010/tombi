@@ -80,6 +80,7 @@ pub fn run(args: impl Into<Args>) -> Result<(), crate::Error> {
         .init();
 
     match args.subcommand {
+        command::TomlCommand::Cache(args) => command::cache::run(args),
         command::TomlCommand::Format(args) => command::format::run(args),
         command::TomlCommand::Lint(args) => command::lint::run(args),
         command::TomlCommand::Lsp(args) => command::lsp::run(args),
