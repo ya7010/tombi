@@ -85,12 +85,40 @@ pub async fn clean_cache() -> Result<(), crate::Error> {
             cache_dir_path: path.clone(),
             reason: error.to_string(),
         })?;
-    let home_dir = dirs::home_dir().and_then(|home| std::fs::canonicalize(home).ok());
-    let default_cache_dir =
-        dirs::home_dir().and_then(|home| std::fs::canonicalize(home.join(".cache")).ok());
+    let home_path = dirs::home_dir();
+    let home_dir = home_path
+        .as_ref()
+        .map(|home| {
+            canonicalize_allow_missing(home).map_err(|error| {
+                crate::Error::CacheDirectoryResolveFailed {
+                    cache_dir_path: home.to_path_buf(),
+                    reason: error.to_string(),
+                }
+            })
+        })
+        .transpose()?;
+    let default_cache_dir = home_path
+        .map(|home| {
+            let path = home.join(".cache");
+            canonicalize_allow_missing(&path).map_err(|error| {
+                crate::Error::CacheDirectoryResolveFailed {
+                    cache_dir_path: path,
+                    reason: error.to_string(),
+                }
+            })
+        })
+        .transpose()?;
     let xdg_dir = std::env::var_os("XDG_CACHE_HOME")
         .filter(|value| !value.is_empty())
-        .and_then(|value| std::fs::canonicalize(value).ok());
+        .map(|value| {
+            canonicalize_allow_missing(std::path::Path::new(&value)).map_err(|error| {
+                crate::Error::CacheDirectoryResolveFailed {
+                    cache_dir_path: std::path::PathBuf::from(value),
+                    reason: error.to_string(),
+                }
+            })
+        })
+        .transpose()?;
     if is_unsafe_clean_target(
         &canonical,
         &current_dir,
@@ -153,6 +181,33 @@ fn is_unsafe_clean_target(
         || home_dir.is_some_and(|home| home.starts_with(canonical))
         || default_cache_dir.is_some_and(|cache| cache.starts_with(canonical))
         || xdg_dir.is_some_and(|xdg| xdg.starts_with(canonical))
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn canonicalize_allow_missing(path: &std::path::Path) -> std::io::Result<std::path::PathBuf> {
+    let mut ancestor = std::path::absolute(path)?;
+    let mut missing = Vec::new();
+    loop {
+        match std::fs::canonicalize(&ancestor) {
+            Ok(mut resolved) => {
+                for component in missing.into_iter().rev() {
+                    resolved.push(component);
+                }
+                return Ok(resolved);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                match std::fs::symlink_metadata(&ancestor) {
+                    Ok(_) => return Err(error),
+                    Err(metadata_error)
+                        if metadata_error.kind() == std::io::ErrorKind::NotFound => {}
+                    Err(metadata_error) => return Err(metadata_error),
+                }
+                missing.push(ancestor.file_name().ok_or(error)?.to_os_string());
+                ancestor.pop();
+            }
+            Err(error) => return Err(error),
+        }
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -465,6 +520,45 @@ mod tests {
         assert!(custom.is_dir());
         assert!(!cached.exists());
         assert_eq!(std::fs::read_to_string(&sibling).unwrap(), "keep");
+    }
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn rejects_cache_root_containing_uncreated_xdg_home() {
+        let temp = tempfile::tempdir().unwrap();
+        let custom = temp.path().join("custom");
+        std::fs::create_dir(&custom).unwrap();
+        let sentinel = custom.join("keep.txt");
+        std::fs::write(&sentinel, "keep").unwrap();
+        let _cache_home = TestCacheHome::with_tombi_cache_home(Some(&custom));
+        unsafe { std::env::set_var("XDG_CACHE_HOME", custom.join("uncreated")) };
+
+        assert!(matches!(
+            clean_cache().await,
+            Err(Error::UnsafeCacheDirectory { .. })
+        ));
+        assert_eq!(std::fs::read_to_string(&sentinel).unwrap(), "keep");
+    }
+
+    #[cfg(unix)]
+    #[tokio::test(flavor = "current_thread")]
+    async fn rejects_unresolved_xdg_symlink() {
+        use std::os::unix::fs::symlink;
+
+        let temp = tempfile::tempdir().unwrap();
+        let custom = temp.path().join("custom");
+        std::fs::create_dir(&custom).unwrap();
+        let sentinel = custom.join("keep.txt");
+        std::fs::write(&sentinel, "keep").unwrap();
+        let _cache_home = TestCacheHome::with_tombi_cache_home(Some(&custom));
+        let link = temp.path().join("xdg-link");
+        symlink(custom.join("uncreated"), &link).unwrap();
+        unsafe { std::env::set_var("XDG_CACHE_HOME", &link) };
+
+        assert!(matches!(
+            clean_cache().await,
+            Err(Error::CacheDirectoryResolveFailed { .. })
+        ));
+        assert_eq!(std::fs::read_to_string(&sentinel).unwrap(), "keep");
     }
 
     #[tokio::test(flavor = "current_thread")]
