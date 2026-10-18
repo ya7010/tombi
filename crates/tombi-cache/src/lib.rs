@@ -362,7 +362,7 @@ mod tests {
     async fn missing_cache_does_not_create_directory() {
         let cache_home = TestCacheHome::new();
         let path = try_get_tombi_cache_dir_path().unwrap();
-        assert_eq!(path, cache_home.xdg_cache_home_path().join("tombi"));
+        assert_eq!(path, cache_home.tombi_cache_dir_path());
         assert!(!path.exists());
         clean_cache().await.unwrap();
         assert!(!path.exists());
@@ -370,8 +370,8 @@ mod tests {
 
     #[tokio::test(flavor = "current_thread")]
     async fn removes_files_and_directories_but_keeps_root() {
-        let _cache_home = TestCacheHome::new();
-        let path = tombi_cache_dir_path().unwrap();
+        let cache_home = TestCacheHome::new();
+        let path = cache_home.tombi_cache_dir_path();
         std::fs::create_dir_all(path.join("nested")).unwrap();
         std::fs::write(path.join("catalog.json"), "catalog").unwrap();
         std::fs::write(path.join("nested/schema.json"), "schema").unwrap();
@@ -387,8 +387,8 @@ mod tests {
     async fn removes_child_symlink_without_following_it() {
         use std::os::unix::fs::symlink;
 
-        let _cache_home = TestCacheHome::new();
-        let path = tombi_cache_dir_path().unwrap();
+        let cache_home = TestCacheHome::new();
+        let path = cache_home.tombi_cache_dir_path();
         let outside = tempfile::tempdir().unwrap();
         std::fs::create_dir_all(&path).unwrap();
         std::fs::write(outside.path().join("keep.json"), "keep").unwrap();
@@ -469,8 +469,8 @@ mod tests {
 
     #[tokio::test(flavor = "current_thread")]
     async fn cleans_explicit_conventional_cache_home() {
-        let _cache_home = TestCacheHome::new();
-        let conventional = tombi_cache_dir_path().unwrap();
+        let cache_home = TestCacheHome::new();
+        let conventional = cache_home.tombi_cache_dir_path();
         std::fs::create_dir(&conventional).unwrap();
         let sentinel = conventional.join("cached.json");
         std::fs::write(&sentinel, "cache").unwrap();
@@ -552,6 +552,6 @@ mod tests {
 
         let cache_path = get_tombi_cache_dir_path().await.unwrap();
 
-        assert_eq!(cache_path, cache_home.xdg_cache_home_path().join("tombi"));
+        assert_eq!(cache_path, cache_home.tombi_cache_dir_path());
     }
 }
