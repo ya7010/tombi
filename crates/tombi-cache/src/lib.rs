@@ -6,7 +6,7 @@ pub const CACHE_INDEX_FILE_NAME: &str = "__index__.json";
 
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn get_tombi_cache_dir_path() -> Option<std::path::PathBuf> {
-    ensure_cache_dir(tombi_cache_dir_path().ok()?).await
+    ensure_cache_dir(tombi_cache_dir_path()?).await
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -14,21 +14,33 @@ pub async fn get_tombi_cache_dir_path() -> Option<std::path::PathBuf> {
     None
 }
 
-/// Resolve the configured cache location without creating it.
 #[cfg(not(target_arch = "wasm32"))]
-pub fn tombi_cache_dir_path() -> Result<std::path::PathBuf, crate::Error> {
-    let path = if let Some(tombi_cache_home) = std::env::var_os("TOMBI_CACHE_HOME") {
-        std::path::PathBuf::from(tombi_cache_home)
-    } else if let Some(xdg_cache_home) = std::env::var_os("XDG_CACHE_HOME") {
+fn tombi_cache_dir_path() -> Option<std::path::PathBuf> {
+    if let Some(tombi_cache_home) = std::env::var_os("TOMBI_CACHE_HOME") {
+        return Some(std::path::PathBuf::from(tombi_cache_home));
+    }
+
+    if let Some(xdg_cache_home) = std::env::var_os("XDG_CACHE_HOME") {
         let mut cache_dir_path = std::path::PathBuf::from(xdg_cache_home);
         cache_dir_path.push("tombi");
-        cache_dir_path
-    } else {
-        let mut cache_dir_path = dirs::home_dir().ok_or(crate::Error::CacheDirectoryUnavailable)?;
+
+        return Some(cache_dir_path);
+    }
+
+    if let Some(home_dir) = dirs::home_dir() {
+        let mut cache_dir_path = home_dir;
         cache_dir_path.push(".cache");
         cache_dir_path.push("tombi");
-        cache_dir_path
-    };
+        return Some(cache_dir_path);
+    }
+
+    None
+}
+
+/// Resolve the configured cache location without creating it.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn try_get_tombi_cache_dir_path() -> Result<std::path::PathBuf, crate::Error> {
+    let path = tombi_cache_dir_path().ok_or(crate::Error::CacheDirectoryUnavailable)?;
     if path.as_os_str().is_empty() {
         return Err(crate::Error::UnsafeCacheDirectory {
             cache_dir_path: path,
@@ -44,7 +56,7 @@ pub fn tombi_cache_dir_path() -> Result<std::path::PathBuf, crate::Error> {
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn clean_cache() -> Result<(), crate::Error> {
     // Remove a trailing separator before checking the final path component for a symlink.
-    let path: std::path::PathBuf = tombi_cache_dir_path()?.components().collect();
+    let path: std::path::PathBuf = try_get_tombi_cache_dir_path()?.components().collect();
     let metadata = match tokio::fs::symlink_metadata(&path).await {
         Ok(metadata) => metadata,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
@@ -181,7 +193,7 @@ fn cache_file_path(
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn get_existing_cache_file_path(cache_file_uri: &tombi_uri::Uri) -> Option<std::path::PathBuf> {
-    let cache_file_path = cache_file_path(tombi_cache_dir_path().ok()?, cache_file_uri);
+    let cache_file_path = cache_file_path(tombi_cache_dir_path()?, cache_file_uri);
     cache_file_path.is_file().then_some(cache_file_path)
 }
 
@@ -349,7 +361,7 @@ mod tests {
     #[tokio::test(flavor = "current_thread")]
     async fn missing_cache_does_not_create_directory() {
         let cache_home = TestCacheHome::new();
-        let path = tombi_cache_dir_path().unwrap();
+        let path = try_get_tombi_cache_dir_path().unwrap();
         assert_eq!(path, cache_home.xdg_cache_home_path().join("tombi"));
         assert!(!path.exists());
         clean_cache().await.unwrap();
