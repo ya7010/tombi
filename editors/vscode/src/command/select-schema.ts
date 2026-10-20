@@ -7,19 +7,6 @@ import { listSchemas, type SchemaInfo } from "@/lsp/client";
 
 const MIN_VERSION = "0.7.19";
 
-function hasSchemaDirective(document: vscode.TextDocument): boolean {
-  for (let line = 0; line < document.lineCount; line++) {
-    const text = document.lineAt(line).text.trimStart();
-    if (text.startsWith("#:schema ")) {
-      return true;
-    }
-    if (text !== "" && !text.startsWith("#")) {
-      break;
-    }
-  }
-  return false;
-}
-
 export async function selectSchema(
   client: node.LanguageClient,
   lspVersion?: string,
@@ -124,4 +111,17 @@ export async function selectSchema(
     log.error(`Failed to select schema: ${error}`);
     vscode.window.showErrorMessage(`Failed to select schema: ${error}`);
   }
+}
+
+function hasSchemaDirective(document: vscode.TextDocument): boolean {
+  for (let line = 0; line < document.lineCount; line++) {
+    const text = document.lineAt(line).text.trimStart();
+    if (text.startsWith("#:schema ")) {
+      return true;
+    }
+    if (text !== "" && !text.startsWith("#")) {
+      break;
+    }
+  }
+  return false;
 }
