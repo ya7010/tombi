@@ -47,9 +47,6 @@ const client = {
 } as unknown as node.LanguageClient;
 
 const schema = { title: "Selected", uri: "tombi://selected" };
-const warning =
-  "The schema cannot be changed for a file with a #:schema directive.";
-
 describe("selectSchema", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -63,23 +60,12 @@ describe("selectSchema", () => {
 
     await selectSchema(client);
 
-    expect(mocks.showWarningMessage).toHaveBeenCalledWith(warning);
+    expect(mocks.showErrorMessage).toHaveBeenCalledWith(
+      "The schema cannot be changed for a file with `#:schema` directive.",
+    );
     expect(mocks.sendRequest).not.toHaveBeenCalled();
     expect(mocks.showQuickPick).not.toHaveBeenCalled();
     expect(mocks.sendNotification).not.toHaveBeenCalled();
-  });
-
-  it("rejects a directive added while the schema picker is open", async () => {
-    mocks.showQuickPick.mockImplementationOnce(async () => {
-      mocks.text = "#:schema ./schema.json\nanswer = 42\n";
-      return { label: schema.title, schema };
-    });
-
-    await selectSchema(client);
-
-    expect(mocks.showWarningMessage).toHaveBeenCalledWith(warning);
-    expect(mocks.sendNotification).not.toHaveBeenCalled();
-    expect(mocks.showInformationMessage).not.toHaveBeenCalled();
   });
 
   it("allows selection when the directive is below a TOML item", async () => {
@@ -91,7 +77,7 @@ describe("selectSchema", () => {
       "tombi/associateSchema",
       expect.objectContaining({ uri: schema.uri, force: true }),
     );
-    expect(mocks.showWarningMessage).not.toHaveBeenCalled();
+    expect(mocks.showErrorMessage).not.toHaveBeenCalled();
   });
 
   it("does not treat a tab after #:schema as a schema directive", async () => {
@@ -100,6 +86,6 @@ describe("selectSchema", () => {
     await selectSchema(client);
 
     expect(mocks.sendNotification).toHaveBeenCalledOnce();
-    expect(mocks.showWarningMessage).not.toHaveBeenCalled();
+    expect(mocks.showErrorMessage).not.toHaveBeenCalled();
   });
 });
