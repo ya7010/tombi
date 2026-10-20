@@ -6,6 +6,21 @@ import { log } from "@/logging";
 import { listSchemas, type SchemaInfo } from "@/lsp/client";
 
 const MIN_VERSION = "0.7.19";
+const SCHEMA_DIRECTIVE_MESSAGE =
+  "The schema cannot be changed for a file with a #:schema directive.";
+
+function hasSchemaDirective(document: vscode.TextDocument): boolean {
+  for (let line = 0; line < document.lineCount; line++) {
+    const text = document.lineAt(line).text.trimStart();
+    if (text.startsWith("#:schema ")) {
+      return true;
+    }
+    if (text !== "" && !text.startsWith("#")) {
+      break;
+    }
+  }
+  return false;
+}
 
 export async function selectSchema(
   client: node.LanguageClient,
@@ -48,6 +63,11 @@ export async function selectSchema(
       return;
     }
 
+    if (hasSchemaDirective(editor.document)) {
+      vscode.window.showWarningMessage(SCHEMA_DIRECTIVE_MESSAGE);
+      return;
+    }
+
     // Fetch schemas from LSP
     const response = await client.sendRequest(listSchemas, {});
     const schemas = response.schemas;
@@ -80,6 +100,11 @@ export async function selectSchema(
 
     if (!selected) {
       // User cancelled the selection
+      return;
+    }
+
+    if (hasSchemaDirective(editor.document)) {
+      vscode.window.showWarningMessage(SCHEMA_DIRECTIVE_MESSAGE);
       return;
     }
 
