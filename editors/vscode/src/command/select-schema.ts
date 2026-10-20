@@ -27,13 +27,13 @@ export async function selectSchema(
     // Get the active editor
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      vscode.window.showWarningMessage("No active editor");
+      vscode.window.showErrorMessage("No active editor");
       return;
     }
 
     // Check if the active file is a TOML file
     if (editor.document.languageId !== "toml") {
-      vscode.window.showWarningMessage(
+      vscode.window.showErrorMessage(
         "Current file is not a TOML file. Please open a TOML file first.",
       );
       return;
@@ -42,8 +42,15 @@ export async function selectSchema(
     // Get the current file URI
     const documentUri = editor.document.uri;
     if (documentUri.scheme === "untitled") {
-      vscode.window.showWarningMessage(
+      vscode.window.showErrorMessage(
         "Untitled files are not supported. Please save the file first.",
+      );
+      return;
+    }
+
+    if (hasSchemaDirective(editor.document)) {
+      vscode.window.showErrorMessage(
+        "The schema cannot be changed for a file with `#:schema` directive.",
       );
       return;
     }
@@ -104,4 +111,17 @@ export async function selectSchema(
     log.error(`Failed to select schema: ${error}`);
     vscode.window.showErrorMessage(`Failed to select schema: ${error}`);
   }
+}
+
+function hasSchemaDirective(document: vscode.TextDocument): boolean {
+  for (let line = 0; line < document.lineCount; line++) {
+    const text = document.lineAt(line).text.trimStart();
+    if (text.startsWith("#:schema ")) {
+      return true;
+    }
+    if (text !== "" && !text.startsWith("#")) {
+      break;
+    }
+  }
+  return false;
 }
