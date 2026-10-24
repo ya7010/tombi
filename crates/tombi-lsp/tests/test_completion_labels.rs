@@ -119,7 +119,7 @@ mod completion_labels {
             ) -> Ok([
                 {
                     "label": "[]",
-                    "documentation": "#### File patterns to exclude\n\nThe file match pattern to exclude from formatting and linting.\nSupports glob pattern.\n\nValue: `Array`\n\nSchema:",
+                    "documentation": "The file match pattern to exclude from formatting and linting.\nSupports glob pattern.\n\nValue: `Array`\n\nSchema:",
                 },
             ]);
         }
@@ -1325,11 +1325,11 @@ mod completion_labels {
             ) -> Ok([
                 {
                     "label": "value",
-                    "documentation": "first anyOf value\n\nSchema: [composite-array-items.schema.json](file://",
+                    "documentation": "first anyOf value\n\nValue: `String`\n\nSchema: [composite-array-items.schema.json](file://",
                 },
                 {
                     "label": "value",
-                    "documentation": ")\n\n---\n\nsecond anyOf value",
+                    "documentation": ")\n\n---\n\nsecond anyOf value\n\nValue: `String`\n\nSchema: [composite-array-items.schema.json](file://",
                 },
             ]);
         }
