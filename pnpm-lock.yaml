@@ -5,7 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@azure/msal-node': 5.2.2
+  '@azure/identity': 4.14.0
+  '@azure/msal-node': 7.1.0
   '@babel/core': 7.29.6
   '@vinxi/plugin-mdx>esbuild': 0.28.1
   binary-install>axios: 0.31.1
@@ -14,7 +15,7 @@ overrides:
   brace-expansion: 5.0.12
   dompurify: 3.4.17
   esbuild: 0.28.1
-  fast-uri: 3.1.8
+  fast-uri: 3.1.9
   follow-redirects: 1.16.1
   form-data: 4.0.6
   h3: 1.15.11
@@ -27,13 +28,15 @@ overrides:
   postcss: 8.5.23
   qs: 6.16.0
   seroval: 1.6.8
+  serialize-javascript: 7.1.3
   source-map-js: 1.2.2
   tar: 7.5.21
   tmp: 0.2.7
-  undici: 7.29.1
+  undici: 7.30.1
   vue: 3.5.42
   vitest>vite: ^7.3.7
   ws: 8.21.0
+  zod: 4.6.6
 
 importers:
 
@@ -62,7 +65,7 @@ importers:
         version: 0.15.4(solid-js@1.9.12)
       '@solidjs/start':
         specifier: 1.2.0
-        version: 1.2.0(solid-js@1.9.12)(supports-color@10.2.2)(vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))(vite@6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0))
+        version: 1.2.0(solid-js@1.9.12)(supports-color@10.2.2)(vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))(vite@6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0))
       '@vinxi/plugin-mdx':
         specifier: ^3.7.2
         version: 3.7.2(@mdx-js/mdx@3.1.1(supports-color@10.2.2))
@@ -98,7 +101,7 @@ importers:
         version: 0.0.7(solid-js@1.9.12)(vite@6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0))
       vinxi:
         specifier: 0.5.11
-        version: 0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
+        version: 0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
     devDependencies:
       '@types/jsdom':
         specifier: ^21.1.7
@@ -193,7 +196,7 @@ importers:
         version: 0.0.0-dev
       '@tombi-toml/cli-sunos-x64':
         specifier: 0.0.0-dev
-        version: 0.0.0-dev
+        version: link:../cli-sunos-x64
       '@tombi-toml/cli-win32-arm64':
         specifier: 0.0.0-dev
         version: 0.0.0-dev
@@ -290,6 +293,10 @@ packages:
     resolution: {integrity: sha512-Nh5PhEOeY6PrnxNPsEHRr9eimxLwgLlpmguQaHKBinFYA/RU9+kOYVOQqOrTsCL+KSxrLLl1gD8Dk5BFW/7l/w==}
     engines: {node: '>=20.0.0'}
 
+  '@azure/core-process@1.0.0':
+    resolution: {integrity: sha512-/shnJ+ooO8WPxDhPEeI/2oRQuubn16gZ6CvlbpWbEswZfzwI9tI/sMAHmF3x1LuQ9yZYXfLW3TjzGMLEC5blKg==}
+    engines: {node: '>=22.0.0'}
+
   '@azure/core-rest-pipeline@1.23.0':
     resolution: {integrity: sha512-Evs1INHo+jUjwHi1T6SG6Ua/LHOQBCLuKEEE6efIpt4ZOoNonaT1kP32GoOcdNDbfqsD2445CPri3MubBy5DEQ==}
     engines: {node: '>=20.0.0'}
@@ -302,9 +309,9 @@ packages:
     resolution: {integrity: sha512-XPArKLzsvl0Hf0CaGyKHUyVgF7oDnhKoP85Xv6M4StF/1AhfORhZudHtOyf2s+FcbuQ9dPRAjB8J2KvRRMUK2A==}
     engines: {node: '>=20.0.0'}
 
-  '@azure/identity@4.13.1':
-    resolution: {integrity: sha512-5C/2WD5Vb1lHnZS16dNQRPMjN6oV/Upba+C9nBIs15PmOi6A3ZGs4Lr2u60zw4S04gi+u3cEXiqTVP7M4Pz3kw==}
-    engines: {node: '>=20.0.0'}
+  '@azure/identity@4.14.0':
+    resolution: {integrity: sha512-8utCLdTZn14CiAe0HW4JbtzUMsc0mdDwnjUvStFMrR4IxQP8S2eL9zVAdplpfORVJGYmidZElpeXRYjJQ4UyUw==}
+    engines: {node: '>=22.0.0'}
 
   '@azure/logger@1.3.0':
     resolution: {integrity: sha512-fCqPIfOcLE+CGqGPd66c8bZpwAji98tZ4JI9i/mlTNTlsIWslCfpg48s/ypyLxZTump5sypjrKn2/kY7q8oAbA==}
@@ -314,16 +321,16 @@ packages:
     resolution: {integrity: sha512-uYbJ0YarxkVGWEq814BysJry/IPvpDNkVKmc2bMZp4G+igUQkJ5nlFirycwPGUeA9ICLQqCxqExCA1Z1E07bPA==}
     engines: {node: '>=0.8.0'}
 
+  '@azure/msal-common@16.14.2':
+    resolution: {integrity: sha512-HOBR0Gfo39TMrkxNG8k6cfjRkrRjXZc3JQs3ebMWQc9S4cihuknMYra3sgmzbZB752oQBqBN9+WF7c826p2vIQ==}
+    engines: {node: '>=0.8.0'}
+
   '@azure/msal-common@16.5.0':
     resolution: {integrity: sha512-i3eS/5pmxDbIU/mLMENs88Qg3k6XxqJytJy6PpB7L1tCBjdXHJDadCD3Hu1TyTooe7iQo7CYqbocgL/l/8u90g==}
     engines: {node: '>=0.8.0'}
 
-  '@azure/msal-common@16.6.2':
-    resolution: {integrity: sha512-hQjjsekAjB00cM1EmatWJlzhEoK2Qhz7Rj5gvM6tYf8iL7RM3tkxlpU9fG0+ofkulzg9AEEA6dIEnSmDr5ZqUA==}
-    engines: {node: '>=0.8.0'}
-
-  '@azure/msal-node@5.2.2':
-    resolution: {integrity: sha512-toS+2AePxqyzb0YOKttDOOiSl3jrkK9aiqIvpurpis0O34QcIS5gToqrgT39p04Dpxw3YoUU0lxJKTpSFFfA6Q==}
+  '@azure/msal-node@7.1.0':
+    resolution: {integrity: sha512-s1O6hSY/C/dmqykTmmeHY6GhSkDuY8N1gxyhuLyaCwbY7N+UBvU2Wu4flas7+NxZiAPcXNPVpgt3n/HP/5yL+w==}
     engines: {node: '>=20'}
 
   '@babel/code-frame@7.26.2':
@@ -1918,11 +1925,6 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-sunos-x64@0.0.0-dev':
-    engines: {node: '>=14.0.0'}
-    cpu: [x64]
-    os: [sunos]
-
   '@tombi-toml/cli-win32-arm64@0.0.0-dev':
     resolution: {integrity: sha512-d0Fr4C40WFZUFeUOT4xcVqQNwko+F+WEvTGfsw9OOhxA1RwNq/pZ2/H0wL9NM8cmNIq00jhoDklDaPNzTWglFQ==}
     engines: {node: '>=14.0.0'}
@@ -3089,8 +3091,8 @@ packages:
   fast-string-width@3.0.2:
     resolution: {integrity: sha512-gX8LrtNEI5hq8DVUfRQMbr5lpaS4nMIWV+7XEbXk2b8kiQIizgnlr12B4dA3ZEx3308ze0O4Q1R+cHts8kyUJg==}
 
-  fast-uri@3.1.8:
-    resolution: {integrity: sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==}
+  fast-uri@3.1.9:
+    resolution: {integrity: sha512-hS/0Wt3Ya043oKXs0sIxrMpKQITXhMLIrVAKKXi4gozGC9v7YRWVnXIZzjNPTO02M9BdxLCWqK1yRXgNziVyJQ==}
 
   fast-wrap-ansi@0.2.2:
     resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
@@ -3888,10 +3890,6 @@ packages:
     resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
     engines: {node: 18 || 20 || >=22}
 
-  minimatch@10.2.6:
-    resolution: {integrity: sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==}
-    engines: {node: 18 || 20 || >=22}
-
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
@@ -4045,10 +4043,6 @@ packages:
 
   oniguruma-to-es@2.3.0:
     resolution: {integrity: sha512-bwALDxriqfKGfUufKGGepCzu9x7nJQuoRoAFp4AnwehhC2crqrDIAP/uN2qdlsAvSMpeRC3+Yzhqc7hLmle5+g==}
-
-  open@10.2.0:
-    resolution: {integrity: sha512-YgBpdJHPyQ2UE5x+hlSXcnejzAvD0b22U2OuAP+8OnlJT+PjWPxtgmGqKKc+RgTM63U9gN0YzrYc71R2WT/hTA==}
-    engines: {node: '>=18'}
 
   open@11.0.0:
     resolution: {integrity: sha512-smsWv2LzFjP03xmvFoJ331ss6h+jixfA4UUV/Bsiyuu4YJPfN+FIQGOIiv4w9/+MoHkfkJ22UIaQWRVFRfH6Vw==}
@@ -4433,8 +4427,8 @@ packages:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
 
-  serialize-javascript@7.0.5:
-    resolution: {integrity: sha512-F4LcB0UqUl1zErq+1nYEEzSHJnIwb3AF2XWB94b+afhrekOUijwooAYqFyRbjYkm2PAKBabx6oYv/xDxNi8IBw==}
+  serialize-javascript@7.1.3:
+    resolution: {integrity: sha512-kYEnegpAxWFjUw3dSYdSM9zVlTrsxDbsSkq/qd3B7VanqyJ+JdDy6qVyuqVGBhSfuD/rLZQEKuXsO5KZFCrVYQ==}
     engines: {node: '>=20.0.0'}
 
   seroval-plugins@1.5.2:
@@ -4869,8 +4863,8 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
-  undici@7.29.1:
-    resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
+  undici@7.30.1:
+    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
     engines: {node: '>=20.18.1'}
 
   unenv@1.10.0:
@@ -4974,7 +4968,7 @@ packages:
       '@azure/app-configuration': ^1.8.0
       '@azure/cosmos': ^4.2.0
       '@azure/data-tables': ^13.3.0
-      '@azure/identity': ^4.6.0
+      '@azure/identity': 4.14.0
       '@azure/keyvault-secrets': ^4.9.0
       '@azure/storage-blob': ^12.26.0
       '@capacitor/preferences': ^6 || ^7 || ^8
@@ -5343,10 +5337,6 @@ packages:
       utf-8-validate:
         optional: true
 
-  wsl-utils@0.1.0:
-    resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
-    engines: {node: '>=18'}
-
   wsl-utils@0.3.1:
     resolution: {integrity: sha512-g/eziiSUNBSsdDJtCLB8bdYEUMj4jR7AGeUo96p/3dTafgjHhpF4RiCFPiRILwjQoDXx5MqkBr4fwWtR3Ky4Wg==}
     engines: {node: '>=20'}
@@ -5409,8 +5399,8 @@ packages:
     resolution: {integrity: sha512-zK7YHHz4ZXpW89AHXUPbQVGKI7uvkd3hzusTdotCg1UxyaVtg0zFJSTfW/Dq5f7OBBVnq6cZIaC8Ti4hb6dtCA==}
     engines: {node: '>= 14'}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -5469,6 +5459,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@azure/core-process@1.0.0': {}
+
   '@azure/core-rest-pipeline@1.23.0(supports-color@10.2.2)':
     dependencies:
       '@azure/abort-controller': 2.1.2
@@ -5493,18 +5485,19 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/identity@4.13.1(supports-color@10.2.2)':
+  '@azure/identity@4.14.0(supports-color@10.2.2)':
     dependencies:
       '@azure/abort-controller': 2.1.2
       '@azure/core-auth': 1.10.1(supports-color@10.2.2)
       '@azure/core-client': 1.10.1(supports-color@10.2.2)
+      '@azure/core-process': 1.0.0
       '@azure/core-rest-pipeline': 1.23.0(supports-color@10.2.2)
       '@azure/core-tracing': 1.3.1
       '@azure/core-util': 1.13.1(supports-color@10.2.2)
       '@azure/logger': 1.3.0(supports-color@10.2.2)
       '@azure/msal-browser': 5.7.0
-      '@azure/msal-node': 5.2.2
-      open: 10.2.0
+      '@azure/msal-node': 7.1.0
+      open: 11.0.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -5520,13 +5513,13 @@ snapshots:
     dependencies:
       '@azure/msal-common': 16.5.0
 
+  '@azure/msal-common@16.14.2': {}
+
   '@azure/msal-common@16.5.0': {}
 
-  '@azure/msal-common@16.6.2': {}
-
-  '@azure/msal-node@5.2.2':
+  '@azure/msal-node@7.1.0':
     dependencies:
-      '@azure/msal-common': 16.6.2
+      '@azure/msal-common': 16.14.2
       jsonwebtoken: 9.0.3
 
   '@babel/code-frame@7.26.2':
@@ -6625,7 +6618,7 @@ snapshots:
 
   '@rollup/plugin-terser@1.0.0(rollup@4.62.1)':
     dependencies:
-      serialize-javascript: 7.0.5
+      serialize-javascript: 7.1.3
       smob: 1.6.1
       terser: 5.46.1
     optionalDependencies:
@@ -6837,11 +6830,11 @@ snapshots:
     dependencies:
       solid-js: 1.9.12
 
-  '@solidjs/start@1.2.0(solid-js@1.9.12)(supports-color@10.2.2)(vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))(vite@6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0))':
+  '@solidjs/start@1.2.0(solid-js@1.9.12)(supports-color@10.2.2)(vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))(vite@6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0))':
     dependencies:
       '@tanstack/server-functions-plugin': 1.121.21(supports-color@10.2.2)(vite@6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0))
-      '@vinxi/plugin-directives': 0.5.1(vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))
-      '@vinxi/server-components': 0.5.1(vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))
+      '@vinxi/plugin-directives': 0.5.1(vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))
+      '@vinxi/server-components': 0.5.1(vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))
       cookie-es: 2.0.1
       defu: 6.1.7
       error-stack-parser: 2.1.4
@@ -6853,7 +6846,7 @@ snapshots:
       source-map-js: 1.2.2
       terracotta: 1.1.0(solid-js@1.9.12)
       tinyglobby: 0.2.16
-      vinxi: 0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
+      vinxi: 0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
       vite-plugin-solid: 2.11.12(solid-js@1.9.12)(supports-color@10.2.2)(vite@6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0))
     transitivePeerDependencies:
       - '@testing-library/jest-dom'
@@ -6953,9 +6946,6 @@ snapshots:
     optional: true
 
   '@tombi-toml/cli-linux-x64@0.0.0-dev':
-    optional: true
-
-  '@tombi-toml/cli-sunos-x64@0.0.0-dev':
     optional: true
 
   '@tombi-toml/cli-win32-arm64@0.0.0-dev':
@@ -7256,7 +7246,7 @@ snapshots:
       untun: 0.1.3
       uqr: 0.1.3
 
-  '@vinxi/plugin-directives@0.5.1(vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))':
+  '@vinxi/plugin-directives@0.5.1(vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))':
     dependencies:
       '@babel/parser': 7.29.2
       acorn: 8.16.0
@@ -7267,7 +7257,7 @@ snapshots:
       magicast: 0.2.11
       recast: 0.23.11
       tslib: 2.8.1
-      vinxi: 0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
+      vinxi: 0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
 
   '@vinxi/plugin-mdx@3.7.2(@mdx-js/mdx@3.1.1(supports-color@10.2.2))':
     dependencies:
@@ -7278,16 +7268,16 @@ snapshots:
       unified: 9.2.2
       vfile: 5.3.7
 
-  '@vinxi/server-components@0.5.1(vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))':
+  '@vinxi/server-components@0.5.1(vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))':
     dependencies:
-      '@vinxi/plugin-directives': 0.5.1(vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))
+      '@vinxi/plugin-directives': 0.5.1(vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0))
       acorn: 8.16.0
       acorn-loose: 8.5.2
       acorn-typescript: 1.4.13(acorn@8.16.0)
       astring: 1.9.0
       magicast: 0.2.11
       recast: 0.23.11
-      vinxi: 0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
+      vinxi: 0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0)
 
   '@vitest/expect@4.1.12':
     dependencies:
@@ -7373,7 +7363,7 @@ snapshots:
 
   '@vscode/vsce@3.9.2(supports-color@10.2.2)':
     dependencies:
-      '@azure/identity': 4.13.1(supports-color@10.2.2)
+      '@azure/identity': 4.14.0(supports-color@10.2.2)
       '@secretlint/node': 10.2.2(supports-color@10.2.2)
       '@secretlint/secretlint-formatter-sarif': 10.2.2
       '@secretlint/secretlint-rule-no-dotenv': 10.2.2
@@ -7496,7 +7486,7 @@ snapshots:
   ajv@8.18.0:
     dependencies:
       fast-deep-equal: 3.1.3
-      fast-uri: 3.1.8
+      fast-uri: 3.1.9
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
@@ -7788,7 +7778,7 @@ snapshots:
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 7.29.1
+      undici: 7.30.1
       whatwg-mimetype: 4.0.0
 
   chokidar@3.6.0:
@@ -8272,7 +8262,7 @@ snapshots:
     dependencies:
       fast-string-truncated-width: 3.0.3
 
-  fast-uri@3.1.8: {}
+  fast-uri@3.1.9: {}
 
   fast-wrap-ansi@0.2.2:
     dependencies:
@@ -9387,10 +9377,6 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.12
 
-  minimatch@10.2.6:
-    dependencies:
-      brace-expansion: 5.0.12
-
   minimist@1.2.8:
     optional: true
 
@@ -9430,7 +9416,7 @@ snapshots:
   napi-build-utils@2.0.0:
     optional: true
 
-  nitropack@2.13.4(@azure/identity@4.13.1(supports-color@10.2.2))(supports-color@10.2.2):
+  nitropack@2.13.4(@azure/identity@4.14.0(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.2
       '@rollup/plugin-alias': 6.0.0(rollup@4.62.1)
@@ -9497,7 +9483,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       unimport: 6.3.0
       unplugin-utils: 0.3.1
-      unstorage: 1.17.5(@azure/identity@4.13.1(supports-color@10.2.2))(db0@0.3.4)(ioredis@5.10.1(supports-color@10.2.2))
+      unstorage: 1.17.5(@azure/identity@4.14.0(supports-color@10.2.2))(db0@0.3.4)(ioredis@5.10.1(supports-color@10.2.2))
       untyped: 2.0.0
       unwasm: 0.5.3
       youch: 4.1.1
@@ -9619,13 +9605,6 @@ snapshots:
       emoji-regex-xs: 1.0.0
       regex: 5.1.1
       regex-recursion: 5.1.1
-
-  open@10.2.0:
-    dependencies:
-      default-browser: 5.5.0
-      define-lazy-prop: 3.0.0
-      is-inside-container: 1.0.0
-      wsl-utils: 0.1.0
 
   open@11.0.0:
     dependencies:
@@ -10126,7 +10105,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  serialize-javascript@7.0.5: {}
+  serialize-javascript@7.1.3: {}
 
   seroval-plugins@1.5.2(seroval@1.6.8):
     dependencies:
@@ -10592,7 +10571,7 @@ snapshots:
 
   undici-types@7.16.0: {}
 
-  undici@7.29.1: {}
+  undici@7.30.1: {}
 
   unenv@1.10.0:
     dependencies:
@@ -10737,7 +10716,7 @@ snapshots:
       picomatch: 4.0.4
       webpack-virtual-modules: 0.6.2
 
-  unstorage@1.17.5(@azure/identity@4.13.1(supports-color@10.2.2))(db0@0.3.4)(ioredis@5.10.1(supports-color@10.2.2)):
+  unstorage@1.17.5(@azure/identity@4.14.0(supports-color@10.2.2))(db0@0.3.4)(ioredis@5.10.1(supports-color@10.2.2)):
     dependencies:
       anymatch: 3.1.3
       chokidar: 5.0.0
@@ -10748,7 +10727,7 @@ snapshots:
       ofetch: 1.5.1
       ufo: 1.6.3
     optionalDependencies:
-      '@azure/identity': 4.13.1(supports-color@10.2.2)
+      '@azure/identity': 4.14.0(supports-color@10.2.2)
       db0: 0.3.4
       ioredis: 5.10.1(supports-color@10.2.2)
 
@@ -10832,7 +10811,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vinxi@0.5.11(@azure/identity@4.13.1(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0):
+  vinxi@0.5.11(@azure/identity@4.14.0(supports-color@10.2.2))(@types/node@24.10.1)(db0@0.3.4)(debug@4.4.3(supports-color@10.2.2))(ioredis@5.10.1(supports-color@10.2.2))(jiti@2.6.1)(supports-color@10.2.2)(terser@5.46.1)(tsx@4.21.0):
     dependencies:
       '@babel/core': 7.29.6(supports-color@10.2.2)
       '@babel/plugin-syntax-jsx': 7.28.6(@babel/core@7.29.6(supports-color@10.2.2))
@@ -10853,7 +10832,7 @@ snapshots:
       hookable: 5.5.3
       http-proxy: 1.18.1(debug@4.4.3(supports-color@10.2.2))
       micromatch: 4.0.8
-      nitropack: 2.13.4(@azure/identity@4.13.1(supports-color@10.2.2))(supports-color@10.2.2)
+      nitropack: 2.13.4(@azure/identity@4.14.0(supports-color@10.2.2))(supports-color@10.2.2)
       node-fetch-native: 1.6.7
       path-to-regexp: 6.3.0
       pathe: 1.1.2
@@ -10865,9 +10844,9 @@ snapshots:
       ufo: 1.6.3
       unctx: 2.5.0
       unenv: 1.10.0
-      unstorage: 1.17.5(@azure/identity@4.13.1(supports-color@10.2.2))(db0@0.3.4)(ioredis@5.10.1(supports-color@10.2.2))
+      unstorage: 1.17.5(@azure/identity@4.14.0(supports-color@10.2.2))(db0@0.3.4)(ioredis@5.10.1(supports-color@10.2.2))
       vite: 6.4.4(@types/node@24.10.1)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)
-      zod: 4.4.3
+      zod: 4.6.6
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -10994,7 +10973,7 @@ snapshots:
 
   vscode-languageclient@10.1.2:
     dependencies:
-      minimatch: 10.2.6
+      minimatch: 10.2.5
       semver: 7.8.5
       vscode-languageserver-protocol: 3.18.4
       vscode-languageserver-textdocument: 1.0.15
@@ -11092,10 +11071,6 @@ snapshots:
 
   ws@8.21.0: {}
 
-  wsl-utils@0.1.0:
-    dependencies:
-      is-wsl: 3.1.1
-
   wsl-utils@0.3.1:
     dependencies:
       is-wsl: 3.1.1
@@ -11165,6 +11140,6 @@ snapshots:
       compress-commons: 6.0.2
       readable-stream: 4.7.0
 
-  zod@4.4.3: {}
+  zod@4.6.6: {}
 
   zwitch@2.0.4: {}
