@@ -36,7 +36,7 @@ jobs:
             .github/actions/relevant-changes/**
             Cargo.toml
             Cargo.lock
-            rust-toolchain.toml
+            mise.toml
             flake.nix
             flake.lock
             crates/**

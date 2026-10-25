@@ -46,7 +46,7 @@ jobs:
           paths: |
             .cargo/**
             .config/nextest.toml
-            .node-version
+            mise.toml
             .npmrc
             .github/actions/relevant-changes/**
             Cargo.toml
@@ -54,7 +54,6 @@ jobs:
             package.json
             pnpm-lock.yaml
             pnpm-workspace.yaml
-            rust-toolchain.toml
             clippy.toml
             rustfmt.toml
             toml.ungram
@@ -85,6 +84,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with:
+          install_args: "rust"
       - name: Create Tombi cache directory
         run: mkdir -p "$TOMBI_CACHE_HOME"
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -108,6 +110,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with:
+          install_args: "rust"
       - uses: cargo-bins/cargo-binstall@8aac5aa2bf0dfaa2863eccad9f43c68fe40e5ec8 # v1.14.1
       - run: cargo binstall --no-confirm cargo-shear
       - run: cargo shear
@@ -125,14 +130,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          run_install: false
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version-file: '.node-version'
-          cache: 'pnpm'
+          install_args: "node pnpm rust"
       - run: pnpm install --frozen-lockfile
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
@@ -154,14 +154,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          run_install: false
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version-file: '.node-version'
-          cache: 'pnpm'
+          install_args: "node pnpm rust"
       - run: pnpm install --frozen-lockfile
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:

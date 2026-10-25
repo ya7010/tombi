@@ -36,7 +36,7 @@ jobs:
             .cargo/**
             Cargo.toml
             Cargo.lock
-            rust-toolchain.toml
+            mise.toml
             crates/**
             extensions/**
             rust/**
@@ -76,9 +76,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-
-      - name: Install Rust toolchain
-        run: rustup update --no-self-update stable
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with:
+          install_args: "rust"
 
       - name: Install cross
         run: .github/scripts/install-cross.sh

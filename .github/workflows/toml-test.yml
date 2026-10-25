@@ -34,7 +34,7 @@ jobs:
             .github/actions/relevant-changes/**
             Cargo.toml
             Cargo.lock
-            rust-toolchain.toml
+            mise.toml
             crates/**
             extensions/**
             rust/**
@@ -63,17 +63,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-
-      - name: Set up Go
-        uses: actions/setup-go@7b8cf10d4e4a01d4992d18a89f4d7dc5a3e6d6f4 # v4
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          go-version: '1.21'
+          install_args: "go rust"
 
       - name: Install toml-test
         run: go install github.com/toml-lang/toml-test/v2/cmd/toml-test@latest
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2

@@ -41,11 +41,10 @@ jobs:
             .github/actions/relevant-changes/**
             .github/actions/set-version/**
             .github/scripts/install-cross.sh
-            .node-version
+            mise.toml
             package.json
             Cargo.toml
             Cargo.lock
-            rust-toolchain.toml
             crates/**
             extensions/**
             rust/**
@@ -100,16 +99,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
-        if: ${{ !matrix.use_cross }}
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          run_install: false
+          install_args: "node pnpm rust"
+          cache: false
 
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version-file: ".node-version"
 
       - name: Install Rust toolchain
         if: ${{ !matrix.use_cross }}
@@ -211,6 +205,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with:
+          install_args: "node pnpm rust"
+          cache: false
 
       - name: Download CLI artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -218,15 +216,10 @@ jobs:
           pattern: cli-*
           merge-multiple: true
 
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
-        with:
-          run_install: false
-
       - uses: ./.github/actions/set-version
-      - name: Install Node.js
+      - name: Configure npm registry
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version-file: ".node-version"
           registry-url: "https://registry.npmjs.org"
 
       - name: Install WASM target
