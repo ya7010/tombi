@@ -1,0 +1,15 @@
+[tools]
+go = "1.21"
+java = "zulu-21"
+node = "26.12.1"
+pnpm = "11.20.0"
+python = "3.12"
+uv = "0.10.7"
+
+[tools.rust]
+version = "stable"
+components = ["clippy", "rust-analyzer", "rust-src", "rustfmt"]
+targets = ["wasm32-wasip2"]
+
+[env]
+UV_PYTHON = { value = "{% if tools.python is defined %}{{ tools.python.path }}{% endif %}", tools = true }

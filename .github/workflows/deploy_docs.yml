@@ -39,13 +39,12 @@ jobs:
             typescript/@tombi-toml/wasm-lib/**
             typescript/@tombi-toml/wasm-lsp/**
             .github/actions/relevant-changes/**
-            .node-version
+            mise.toml
             .npmrc
             Cargo.toml
             Cargo.lock
             pnpm-lock.yaml
             pnpm-workspace.yaml
-            rust-toolchain.toml
             .github/workflows/deploy_docs.yml
 
   deploy:
@@ -60,15 +59,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          run_install: false
+          install_args: "node pnpm rust"
+          cache: false
 
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version-file: ".node-version"
 
       - name: Install dependencies
         working-directory: ./docs

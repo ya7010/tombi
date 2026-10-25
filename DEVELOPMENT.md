@@ -1,5 +1,9 @@
 # Developer Documentation
 
+## Tool versions
+
+Install [mise](https://mise.jdx.dev/) and run `mise install` from the repository root. The versions of Go, Java, Node.js, pnpm, Python, Rust, and uv are declared in `mise.toml`. Activate mise in your shell so its shims take precedence over other version managers.
+
 ## Debug CLI
 
 > [!NOTE]

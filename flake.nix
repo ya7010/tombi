@@ -36,8 +36,13 @@
           overlays = [ (import rust-overlay) ];
         };
 
+        toolVersions = (builtins.fromTOML (builtins.readFile ./mise.toml)).tools;
         craneLib = (crane.mkLib pkgs).overrideToolchain (
-          p: p.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
+          p:
+          p.rust-bin.${toolVersions.rust.version}.latest.default.override {
+            extensions = toolVersions.rust.components;
+            targets = toolVersions.rust.targets;
+          }
         );
 
         # All the files in the source directory
