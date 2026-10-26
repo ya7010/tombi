@@ -6,7 +6,8 @@ import {
 export type TomlVersionSource = "comment" | "schema" | "config" | "default";
 export type IgnoreReason =
   | "include-file-pattern-not-matched"
-  | "exclude-file-pattern-matched";
+  | "exclude-file-pattern-matched"
+  | "ignore-file-matched";
 
 export type SchemaStatus = {
   title?: string;
