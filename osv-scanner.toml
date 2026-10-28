@@ -2,11 +2,6 @@
 # Remove each entry once a patched version is published and the lockfile is updated.
 
 [[IgnoredVulns]]
-id = "GHSA-vfj7-8cjw-p6xm"
-ignoreUntil = 2026-11-10
-reason = "braces: no fixed version released yet"
-
-[[IgnoredVulns]]
 id = "GHSA-gcqx-w48m-w2h4"
 ignoreUntil = 2026-11-10
 reason = "deepmerge: node-resolve merges only static defaults; no fixed version released yet"
