@@ -12,10 +12,7 @@ pub async fn handle_formatting(
     backend: &Backend,
     params: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp_server::jsonrpc::Error> {
-    #[cfg(not(windows))]
-    let text_document_uri: &tombi_uri::Uri = (&params.text_document.uri).into();
-    #[cfg(windows)]
-    let text_document_uri = &tombi_uri::Uri::from(params.text_document.uri.clone());
+    let text_document_uri: tombi_uri::Uri = params.text_document.uri.clone().into();
 
     let ConfigSchemaStore {
         config,
@@ -23,7 +20,7 @@ pub async fn handle_formatting(
         config_path,
     } = backend
         .config_manager
-        .config_schema_store_for_uri(text_document_uri)
+        .config_schema_store_for_uri(&text_document_uri)
         .await;
 
     if !config
@@ -62,7 +59,7 @@ pub async fn handle_formatting(
         }
     }
 
-    let Some(document_source) = backend.document_source(text_document_uri) else {
+    let Some(document_source) = backend.document_source(&text_document_uri) else {
         return Ok(None);
     };
     let (toml_version, encoding, version) = (
@@ -89,8 +86,6 @@ pub async fn handle_formatting(
 
     log::info!("handle_formatting");
     log::debug!("{:?}", params);
-
-    let text_document_uri = params.text_document.uri.into();
 
     match tombi_formatter::Formatter::new(
         toml_version,

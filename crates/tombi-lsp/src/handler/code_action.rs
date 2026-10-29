@@ -14,10 +14,7 @@ pub async fn handle_code_action(
     backend: &Backend,
     params: CodeActionParams,
 ) -> Result<Option<Vec<CodeActionResponse>>, tower_lsp_server::jsonrpc::Error> {
-    #[cfg(not(windows))]
-    let text_document_uri: &tombi_uri::Uri = (&params.text_document.uri).into();
-    #[cfg(windows)]
-    let text_document_uri = &tombi_uri::Uri::from(params.text_document.uri.clone());
+    let text_document_uri: tombi_uri::Uri = params.text_document.uri.clone().into();
 
     let ConfigSchemaStore {
         config,
@@ -25,7 +22,7 @@ pub async fn handle_code_action(
         ..
     } = backend
         .config_manager
-        .config_schema_store_for_uri(text_document_uri)
+        .config_schema_store_for_uri(&text_document_uri)
         .await;
 
     if !config
@@ -43,12 +40,7 @@ pub async fn handle_code_action(
     log::info!("handle_code_action");
     log::debug!("{:?}", params);
 
-    let CodeActionParams {
-        text_document,
-        range,
-        ..
-    } = params;
-    let text_document_uri = text_document.uri.into();
+    let CodeActionParams { range, .. } = params;
 
     let Some(document_source) = backend.document_source(&text_document_uri) else {
         return Ok(None);

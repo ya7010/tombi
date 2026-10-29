@@ -16,17 +16,12 @@ pub async fn handle_completion(
     backend: &backend::Backend,
     params: CompletionParams,
 ) -> Result<Option<Vec<CompletionContent>>, tower_lsp_server::jsonrpc::Error> {
-    #[cfg(not(windows))]
-    let text_document_uri: &tombi_uri::Uri =
-        (&params.text_document_position_params.text_document.uri).into();
-    #[cfg(windows)]
-    let text_document_uri = &tombi_uri::Uri::from(
-        params
-            .text_document_position_params
-            .text_document
-            .uri
-            .clone(),
-    );
+    let text_document_uri: tombi_uri::Uri = params
+        .text_document_position_params
+        .text_document
+        .uri
+        .clone()
+        .into();
 
     let ConfigSchemaStore {
         config,
@@ -34,7 +29,7 @@ pub async fn handle_completion(
         ..
     } = backend
         .config_manager
-        .config_schema_store_for_uri(text_document_uri)
+        .config_schema_store_for_uri(&text_document_uri)
         .await;
 
     if !config
@@ -64,14 +59,9 @@ pub async fn handle_completion(
     log::debug!("{:?}", params);
 
     let CompletionParams {
-        text_document_position_params:
-            TextDocumentPositionParams {
-                text_document,
-                position,
-            },
+        text_document_position_params: TextDocumentPositionParams { position, .. },
         ..
     } = params;
-    let text_document_uri = text_document.uri.into();
 
     let Ok(document_sources) = backend.document_sources.try_read() else {
         return Ok(None);

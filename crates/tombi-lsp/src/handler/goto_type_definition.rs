@@ -47,17 +47,12 @@ pub async fn handle_goto_type_definition(
     backend: &Backend,
     params: TypeDefinitionParams,
 ) -> Result<Option<Vec<SchemaLocation>>, tower_lsp_server::jsonrpc::Error> {
-    #[cfg(not(windows))]
-    let text_document_uri: &tombi_uri::Uri =
-        (&params.text_document_position_params.text_document.uri).into();
-    #[cfg(windows)]
-    let text_document_uri = &tombi_uri::Uri::from(
-        params
-            .text_document_position_params
-            .text_document
-            .uri
-            .clone(),
-    );
+    let text_document_uri: tombi_uri::Uri = params
+        .text_document_position_params
+        .text_document
+        .uri
+        .clone()
+        .into();
 
     let ConfigSchemaStore {
         config,
@@ -65,7 +60,7 @@ pub async fn handle_goto_type_definition(
         ..
     } = backend
         .config_manager
-        .config_schema_store_for_uri(text_document_uri)
+        .config_schema_store_for_uri(&text_document_uri)
         .await;
 
     if !config
@@ -87,13 +82,9 @@ pub async fn handle_goto_type_definition(
 
     let TypeDefinitionParams {
         text_document_position_params:
-            tower_lsp_server::gen_lsp_types::TextDocumentPositionParams {
-                text_document,
-                position,
-            },
+            tower_lsp_server::gen_lsp_types::TextDocumentPositionParams { position, .. },
         ..
     } = params;
-    let text_document_uri = text_document.uri.into();
 
     let Some(document_source) = backend.document_source(&text_document_uri) else {
         return Ok(Default::default());

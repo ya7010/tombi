@@ -16,17 +16,12 @@ pub async fn handle_hover(
     backend: &backend::Backend,
     params: HoverParams,
 ) -> Result<Option<HoverContent>, tower_lsp_server::jsonrpc::Error> {
-    #[cfg(not(windows))]
-    let text_document_uri: &tombi_uri::Uri =
-        (&params.text_document_position_params.text_document.uri).into();
-    #[cfg(windows)]
-    let text_document_uri = &tombi_uri::Uri::from(
-        params
-            .text_document_position_params
-            .text_document
-            .uri
-            .clone(),
-    );
+    let text_document_uri: tombi_uri::Uri = params
+        .text_document_position_params
+        .text_document
+        .uri
+        .clone()
+        .into();
 
     let ConfigSchemaStore {
         config,
@@ -34,7 +29,7 @@ pub async fn handle_hover(
         ..
     } = backend
         .config_manager
-        .config_schema_store_for_uri(text_document_uri)
+        .config_schema_store_for_uri(&text_document_uri)
         .await;
 
     if !config
@@ -53,14 +48,9 @@ pub async fn handle_hover(
     log::debug!("{:?}", params);
 
     let HoverParams {
-        text_document_position_params:
-            TextDocumentPositionParams {
-                text_document,
-                position,
-            },
+        text_document_position_params: TextDocumentPositionParams { position, .. },
         ..
     } = params;
-    let text_document_uri = text_document.uri.into();
 
     let Some(document_source) = backend.document_source(&text_document_uri) else {
         return Ok(None);
