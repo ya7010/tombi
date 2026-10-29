@@ -47,18 +47,17 @@ pub async fn handle_goto_type_definition(
     backend: &Backend,
     params: TypeDefinitionParams,
 ) -> Result<Option<Vec<SchemaLocation>>, tower_lsp_server::jsonrpc::Error> {
-    log::trace!("{:?}", params);
-
-    let TypeDefinitionParams {
-        text_document_position_params:
-            tower_lsp_server::gen_lsp_types::TextDocumentPositionParams {
-                text_document,
-                position,
-                ..
-            },
-        ..
-    } = params;
-    let text_document_uri = text_document.uri.into();
+    #[cfg(not(windows))]
+    let text_document_uri: &tombi_uri::Uri =
+        (&params.text_document_position_params.text_document.uri).into();
+    #[cfg(windows)]
+    let text_document_uri = &tombi_uri::Uri::from(
+        params
+            .text_document_position_params
+            .text_document
+            .uri
+            .clone(),
+    );
 
     let ConfigSchemaStore {
         config,
@@ -72,16 +71,29 @@ pub async fn handle_goto_type_definition(
     if !config
         .lsp
         .as_ref()
-        .and_then(|server| server.goto_type_definition.as_ref())
+        .and_then(|lsp| lsp.goto_type_definition.as_ref())
         .and_then(|goto_type_definition| goto_type_definition.enabled)
         .unwrap_or_default()
         .value()
     {
-        log::debug!("`server.goto_type_definition.enabled` is false");
+        log::debug!(
+            "skip goto type definition because `lsp.goto_type_definition.enabled` is false."
+        );
         return Ok(Default::default());
     }
 
     log::info!("handle_goto_type_definition");
+    log::debug!("{:?}", params);
+
+    let TypeDefinitionParams {
+        text_document_position_params:
+            tower_lsp_server::gen_lsp_types::TextDocumentPositionParams {
+                text_document,
+                position,
+            },
+        ..
+    } = params;
+    let text_document_uri = text_document.uri.into();
 
     let Some(document_source) = backend.document_source(&text_document_uri) else {
         return Ok(Default::default());

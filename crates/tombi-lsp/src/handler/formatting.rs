@@ -12,14 +12,10 @@ pub async fn handle_formatting(
     backend: &Backend,
     params: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, tower_lsp_server::jsonrpc::Error> {
-    log::trace!("{:?}", params);
-
-    let DocumentFormattingParams {
-        text_document,
-        options: _editor_formatting_options,
-        ..
-    } = params;
-    let text_document_uri = text_document.uri.into();
+    #[cfg(not(windows))]
+    let text_document_uri: &tombi_uri::Uri = (&params.text_document.uri).into();
+    #[cfg(windows)]
+    let text_document_uri = &tombi_uri::Uri::from(params.text_document.uri.clone());
 
     let ConfigSchemaStore {
         config,
@@ -33,16 +29,14 @@ pub async fn handle_formatting(
     if !config
         .lsp
         .as_ref()
-        .and_then(|server| server.formatting.as_ref())
+        .and_then(|lsp| lsp.formatting.as_ref())
         .and_then(|formatting| formatting.enabled)
         .unwrap_or_default()
         .value()
     {
-        log::debug!("`server.formatting.enabled` is false");
+        log::debug!("skip formatting because `lsp.formatting.enabled` is false.");
         return Ok(None);
     }
-
-    log::info!("handle_formatting");
 
     if let Ok(text_document_path) = text_document_uri.to_file_path() {
         let workspace_folder_paths = crate::workspace_config::workspace_folder_paths(backend).await;
@@ -54,15 +48,15 @@ pub async fn handle_formatting(
         ) {
             MatchResult::Matched => {}
             MatchResult::IncludeNotMatched => {
-                log::info!("skip {text_document_path:?} because it is not in config.files.include");
+                log::debug!("skip formatting because it is not in `config.files.include`.");
                 return Ok(None);
             }
             MatchResult::ExcludeMatched => {
-                log::info!("skip {text_document_path:?} because it is in config.files.exclude");
+                log::debug!("skip formatting because it is in `config.files.exclude`.");
                 return Ok(None);
             }
             MatchResult::Ignored => {
-                log::info!("skip {text_document_path:?} because it is ignored by ignore files");
+                log::debug!("skip formatting because it is ignored by ignore files.");
                 return Ok(None);
             }
         }
@@ -92,6 +86,11 @@ pub async fn handle_formatting(
         );
         return Ok(None);
     };
+
+    log::info!("handle_formatting");
+    log::debug!("{:?}", params);
+
+    let text_document_uri = params.text_document.uri.into();
 
     match tombi_formatter::Formatter::new(
         toml_version,

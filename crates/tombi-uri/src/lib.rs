@@ -56,6 +56,13 @@ impl From<url::Url> for Uri {
     }
 }
 
+impl<'a> From<&'a url::Url> for &'a Uri {
+    fn from(url: &'a url::Url) -> Self {
+        // SAFETY: Uri is a transparent wrapper around url::Url.
+        unsafe { std::mem::transmute(url) }
+    }
+}
+
 impl<'de> serde::Deserialize<'de> for Uri {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -79,7 +86,7 @@ impl AsRef<url::Url> for Uri {
 
 impl AsRef<Uri> for url::Url {
     fn as_ref(&self) -> &Uri {
-        unsafe { std::mem::transmute(self) }
+        self.into()
     }
 }
 
@@ -220,6 +227,17 @@ mod tests {
     use serde::Deserialize;
 
     use super::{Uri, normalize_windows_file_url};
+
+    #[rstest]
+    #[case("file:///project/Cargo.toml")]
+    #[case("https://example.com/schema.json")]
+    fn borrowed_url_is_uri_without_copy(#[case] input: &str) {
+        let url = url::Url::parse(input).unwrap();
+        let uri: &Uri = (&url).into();
+
+        assert!(std::ptr::eq(uri.as_ref(), &url));
+        assert_eq!(uri.as_str(), url.as_str());
+    }
 
     #[rstest]
     #[case("file:///C:/project/Cargo.toml", "file:///c:/project/Cargo.toml")]
