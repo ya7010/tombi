@@ -24,7 +24,7 @@ pub async fn handle_goto_declaration(
 
     let ConfigSchemaStore { config, .. } = backend
         .config_manager
-        .config_schema_store_for_uri(&text_document_uri)
+        .config_schema_store_for_uri(text_document_uri)
         .await;
 
     if !config

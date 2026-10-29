@@ -23,7 +23,7 @@ pub async fn handle_formatting(
         config_path,
     } = backend
         .config_manager
-        .config_schema_store_for_uri(&text_document_uri)
+        .config_schema_store_for_uri(text_document_uri)
         .await;
 
     if !config
@@ -62,7 +62,7 @@ pub async fn handle_formatting(
         }
     }
 
-    let Some(document_source) = backend.document_source(&text_document_uri) else {
+    let Some(document_source) = backend.document_source(text_document_uri) else {
         return Ok(None);
     };
     let (toml_version, encoding, version) = (
